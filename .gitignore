@@ -1,0 +1,20 @@
+# Arquivos temporários ou de sistema
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+
+# Ambiente virtual
+venv/
+env/
+
+# Arquivos de configuração
+*.pyc
+*.pyo
+*.pyd
+
+# Dependências geradas
+*.egg-info/
+dist/
+build/
