@@ -11,7 +11,7 @@ class CreateUserForm(Form):
     password = PasswordField('password', [validators.InputRequired(), validators.Length(min=3, max=50)])
 
 
-class CreateFinanceForm(Form):
+class FinanceForm(Form):
     description = StringField('description', [validators.InputRequired(), validators.Length(min=3, max=50)])
     value = FloatField('value', [validators.InputRequired()])
     finance_type = StringField('finance_type', [validators.InputRequired(), validators.Length(min=3, max=50)])

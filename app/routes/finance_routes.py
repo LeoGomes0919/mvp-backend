@@ -12,13 +12,25 @@ def create_finance_router():
     return finance_controller.create_finance()
 
 
+@finance_routes_bp.get('/')
+@jwt_required()
+def get_finance_by_filters_router():
+    return finance_controller.get_by_filters()
+
+
 @finance_routes_bp.get('/<finance_id>')
 @jwt_required()
 def get_finance_by_id_router(finance_id):
     return finance_controller.get_by_id(finance_id)
 
 
-@finance_routes_bp.get('/')
+@finance_routes_bp.put('/<finance_id>')
 @jwt_required()
-def get_finance_by_filters_router():
-    return finance_controller.get_by_filters()
+def update_finance_router(finance_id):
+    return finance_controller.update_finance(finance_id)
+
+
+@finance_routes_bp.delete('/<finance_id>')
+@jwt_required()
+def delete_finance_router(finance_id):
+    return finance_controller.delete_finance(finance_id)

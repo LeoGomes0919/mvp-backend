@@ -23,7 +23,7 @@ class DatabaseManager:
         from app.models import BaseModel
         BaseModel.metadata.create_all(self.engine)
 
-    def save(self, model) -> None:
+    def save(self, model) -> object:
         session = self.Session()
         session.add(model)
         session.commit()
@@ -47,7 +47,7 @@ class DatabaseManager:
         session.commit()
         session.close()
 
-    def update(self, model) -> None:
+    def update(self, model) -> object:
         session = self.Session()
         session.merge(model)
         session.commit()

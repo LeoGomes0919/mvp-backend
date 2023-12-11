@@ -3,14 +3,14 @@ from werkzeug.datastructures import MultiDict
 
 from app.services import finance_service
 from app.utils import AppError, ValidationError
-from app.validators.form_validator import CreateFinanceForm
+from app.validators.form_validator import FinanceForm
 
 
 class FinanceController:
     def create_finance(self) -> None:
         try:
             form_data = MultiDict(request.json)
-            form = CreateFinanceForm(form_data)
+            form = FinanceForm(form_data)
 
             if form.validate():
                 data = form.data
@@ -83,6 +83,64 @@ class FinanceController:
                 'data': finances
             }), 200
         except Exception as e:
+            return jsonify({
+                'status': 'failure',
+                'message': 'Something went wrong',
+                'data': str(e)
+            }), 500
+
+    def update_finance(self, id: str) -> None:
+        try:
+            form_data = MultiDict(request.json)
+            form = FinanceForm(form_data)
+
+            if form.validate():
+                data = form.data
+
+                finance_service.update(id, data)
+
+                return jsonify({
+                    'status': 'success',
+                    'message': 'Finance updated successfully',
+                    'data': None
+                }), 200
+            else:
+                errors = {field: messages[0] for field, messages in form.errors.items()}
+
+                return jsonify({
+                    'status': 'failure',
+                    'message': 'Invalid inputs',
+                    'data': errors
+                }), 400
+        except ValidationError as e:
+            return jsonify({
+                'status': 'failure',
+                'message': 'Invalid data provided',
+                'data': str(e)
+            }), 400
+        except AppError as e:
+            return jsonify({
+                'status': 'failure',
+                'message': 'Something went wrong',
+                'data': str(e)
+            }), 500
+
+    def delete_finance(self, id: str) -> None:
+        try:
+            finance_service.delete(id)
+
+            return jsonify({
+                'status': 'success',
+                'message': 'Finance deleted successfully',
+                'data': None
+            }), 200
+        except ValidationError as e:
+            return jsonify({
+                'status': 'failure',
+                'message': 'Invalid data provided',
+                'data': str(e)
+            }), 400
+        except AppError as e:
             return jsonify({
                 'status': 'failure',
                 'message': 'Something went wrong',

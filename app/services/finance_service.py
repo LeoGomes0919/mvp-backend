@@ -14,23 +14,45 @@ class FinanceService:
         self.category_repository = category_repository
         self.user_repository = user_repository
 
-    def create(self, data: dict) -> None:
+    def create(self, data: dict) -> Finance:
         self.logger.info('[FinanceService]: Creating finance: {data}')
         category = self.category_repository.get_by_id(data.get('category_id'))
-
-        if not category:
-            raise ValidationError('Category not found')
 
         sub = get_jwt_identity()
         user_id = sub.get('user_id')
 
-        if not user_id:
+        if not user_id or not category:
             raise ValidationError('Error on create finance')
 
         now = datetime.now()
         data.update({'date': now, 'user_id': user_id})
 
-        return self.finance_repository.create(data)
+        self.finance_repository.create(data)
+
+    def update(self, id: str, data: dict) -> None:
+        self.logger.info('[FinanceService]: Updating finance: {id}')
+        finance = self.finance_repository.get_by_id(id)
+
+        if not finance:
+            raise ValidationError('Error on update finance')
+
+        category = self.category_repository.get_by_id(data.get('category_id'))
+
+        if not category:
+            raise ValidationError('Error on update finance')
+
+        data.update({'date': finance.date, 'id': id})
+
+        self.finance_repository.update(data)
+
+    def delete(self, id: str) -> None:
+        self.logger.info('[FinanceService]: Deleting finance: {id}')
+        finance = self.finance_repository.get_by_id(id)
+
+        if not finance:
+            raise ValidationError('Error on delete finance')
+
+        return self.finance_repository.delete(finance)
 
     def get_by_filters(self, filters: dict, params: dict):
         self.logger.info('[FinanceService]: Getting all finances')
