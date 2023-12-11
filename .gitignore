@@ -20,3 +20,9 @@ env/
 *.egg-info/
 dist/
 build/
+
+# Arquivos de logs ou dados
+logs/
+*.sqlite3
+*.sqlite
+*.db
