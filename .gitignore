@@ -22,7 +22,7 @@ dist/
 build/
 
 # Arquivos de logs ou dados
-logs/
+*.log
 *.sqlite3
 *.sqlite
 *.db
