@@ -1,31 +1,31 @@
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 
 
 class LoggerManager:
-    def __init__(self, app=None):
-        self.app = app
-        self.init_app()
+    def __init__(self, log_file='logs/app.log', log_level=logging.DEBUG):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(log_level)
 
-    def init_app(self):
-        if self.app:
-            self.configure_logger()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    def configure_logger(self):
-        logging.basicConfig(level=logging.INFO)
+        if not os.path.exists(log_file):
+            open(log_file, 'w').close()
 
-        handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
-        handler.setLevel(logging.INFO)
-        self.app.logger.addHandler(handler)
+        file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024 * 100, backupCount=20)
+        file_handler.setFormatter(formatter)
 
-    def log_info(self, message):
-        if self.app:
-            self.app.logger.info(message)
+        self.logger.addHandler(file_handler)
 
-    def log_error(self, message):
-        if self.app:
-            self.app.logger.error(message)
+    def info(self, message: any):
+        self.logger.info(message)
 
-    def log_warning(self, message):
-        if self.app:
-            self.app.logger.warning(message)
+    def debug(self, message: any):
+        self.logger.debug(message)
+
+    def warning(self, message: any):
+        self.logger.warning(message)
+
+    def error(self, message: any):
+        self.logger.error(message)

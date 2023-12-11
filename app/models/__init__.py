@@ -1,11 +1,15 @@
-from .base_model import BaseModel
-from .category import Category
-from .finance import Finance
-from .user import User
+from .base_model import BaseModel, BaseModelSchema
+from .category import Category, CategorySchema
+from .finance import Finance, FinanceSchema
+from .user import User, UserSchema
 
 __all__ = [
     'BaseModel',
+    'BaseModelSchema',
     'Category',
+    'User',
     'Finance',
-    'User'
+    'UserSchema',
+    'CategorySchema',
+    'FinanceSchema'
 ]

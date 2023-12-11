@@ -1,8 +1,9 @@
 
+from marshmallow import fields
 from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, String
 from sqlalchemy.orm import relationship
 
-from app.models.base_model import BaseModel
+from app.models.base_model import BaseModel, BaseModelSchema
 
 
 class Finance(BaseModel):
@@ -15,14 +16,19 @@ class Finance(BaseModel):
 
     # Adicionando a chave estrangeira para a tabela Category
     category_id = Column(String(36), ForeignKey('categories.id'), nullable=False)
-    category = relationship('Category', foreign_keys=[category_id])
+    category = relationship('Category', foreign_keys=[category_id], lazy='joined')
 
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'description': self.description,
-            'value': self.value,
-            'finance_type': self.finance_type,
-            'date': self.date,
-            'category': self.category.as_dict()
-        }
+    # Adicionando a chave estrangeira para a tabela User
+    user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
+    user = relationship('User', foreign_keys=[user_id], lazy='joined')
+
+
+class FinanceSchema(BaseModelSchema):
+    description = fields.String(required=True)
+    value = fields.Float(required=True)
+    finance_type = fields.String(required=True)
+    date = fields.DateTime(required=True)
+    category = fields.Nested({
+        'id': fields.String(required=True),
+        'name': fields.String(required=True)
+    }, required=True)
