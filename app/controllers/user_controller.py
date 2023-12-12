@@ -1,42 +1,41 @@
-from flask import jsonify, request
+from flask import jsonify
 from werkzeug.datastructures import MultiDict
 
+from app.routes.schemas import *
 from app.services import user_service
-from app.utils import AppError, ValidationError
-from app.validators.form_validator import CreateUserForm
+from app.utils import ValidationError
+from app.validators.form_validator import UserForm
 
 
 class UserController:
-    def create_user(self) -> None:
+    def create_user(self, form: UserFormSchema) -> None:
         try:
-            form_data = MultiDict(request.json)
-            form = CreateUserForm(form_data)
+            data = MultiDict(form)
 
-            if form.validate():
-                data = form.data
+            validate = UserForm(data)
 
-                user_service.create(data)
-
-                return jsonify({
-                    'status': 'success',
-                    'message': 'User created successfully',
-                    'data': None
-                }), 201
-            else:
-                errors = {field: messages[0] for field, messages in form.errors.items()}
-
+            if not validate.validate():
                 return jsonify({
                     'status': 'failure',
-                    'message': 'Invalid inputs',
-                    'data': errors
+                    'message': 'Invalid data provided',
+                    'data': validate.errors
                 }), 400
+
+            user_service.create(validate.data)
+
+            return jsonify({
+                'status': 'success',
+                'message': 'User created successfully',
+                'data': None
+            }), 201
 
         except ValidationError as e:
             return jsonify({
                 'status': 'failure',
                 'message': 'Invalid data provided',
                 'data': str(e)
-            }), 409
+            }), e.code
+
         except Exception as e:
             return jsonify({
                 'status': 'failure',
@@ -59,12 +58,10 @@ class UserController:
                 'status': 'failure',
                 'message': 'Invalid data provided',
                 'data': str(e)
-            }), 400
-        except AppError as e:
+            }), e.code
+        except Exception as e:
             return jsonify({
                 'status': 'failure',
                 'message': 'Something went wrong',
                 'data': str(e)
             }), 500
-
-    # TODO: Add authentication

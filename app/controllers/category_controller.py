@@ -1,36 +1,33 @@
 from flask import jsonify, request
 from werkzeug.datastructures import MultiDict
 
+from app.routes.schemas import *
 from app.services import category_service
-from app.utils import AppError
-from app.validators.form_validator import CreateCategoryForm
+from app.validators.form_validator import CategoryForm
 
 
 class CategoryController:
-    def create_category(self) -> None:
+    def create_category(self, form: CategoryFormSchema) -> None:
         try:
-            form_data = MultiDict(request.json)
-            form = CreateCategoryForm(form_data)
+            data = MultiDict(form)
+            validate = CategoryForm(data)
 
-            if form.validate():
-                data = form.data
-
-                category_service.create(data)
-
-                return jsonify({
-                    'status': 'success',
-                    'message': 'Category created successfully',
-                    'data': None
-                }), 201
-            else:
-                errors = {field: messages[0] for field, messages in form.errors.items()}
-
+            if not validate.validate():
                 return jsonify({
                     'status': 'failure',
-                    'message': 'Invalid inputs',
-                    'data': errors
+                    'message': 'Invalid data provided',
+                    'data': validate.errors
                 }), 400
-        except AppError as e:
+
+            category_service.create(validate.data)
+
+            return jsonify({
+                'status': 'success',
+                'message': 'Category created successfully',
+                'data': None
+            }), 201
+
+        except Exception as e:
             return jsonify({
                 'status': 'failure',
                 'message': 'Something went wrong',
@@ -46,7 +43,8 @@ class CategoryController:
                 'message': 'Categories found successfully',
                 'data': categories
             }), 200
-        except AppError as e:
+
+        except Exception as e:
             return jsonify({
                 'status': 'failure',
                 'message': 'Something went wrong',

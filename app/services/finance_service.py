@@ -16,13 +16,17 @@ class FinanceService:
 
     def create(self, data: dict) -> Finance:
         self.logger.info('[FinanceService]: Creating finance: {data}')
-        category = self.category_repository.get_by_id(data.get('category_id'))
 
         sub = get_jwt_identity()
         user_id = sub.get('user_id')
 
-        if not user_id or not category:
-            raise ValidationError('Error on create finance')
+        if not user_id:
+            raise ValidationError('Error on create finance unauthorized', 401)
+
+        category = self.category_repository.get_by_id(data.get('category_id'))
+
+        if not category:
+            raise ValidationError('Error on create finance category not found')
 
         now = datetime.now()
         data.update({'date': now, 'user_id': user_id})
@@ -50,20 +54,20 @@ class FinanceService:
         finance = self.finance_repository.get_by_id(id)
 
         if not finance:
-            raise ValidationError('Error on delete finance')
+            raise ValidationError('Error on delete finance not found')
 
         return self.finance_repository.delete(finance)
 
-    def get_by_filters(self, filters: dict, params: dict):
+    def get_by_filters(self, filters: dict, pagination: dict):
         self.logger.info('[FinanceService]: Getting all finances')
 
         if filters.get('finance_type'):
-            if filters.get('finance_type') == 'entrada':
+            if filters.get('finance_type') == 'entradas':
                 filters['finance_type'] = 'income'
             else:
                 filters['finance_type'] = 'outcome'
 
-        finances = self.finance_repository.get_by_filters(filters, params)
+        finances = self.finance_repository.get_by_filters(filters, pagination)
         finances_schema = FinanceSchema(many=True)
 
         items = finances.get('items')

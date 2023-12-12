@@ -1,14 +1,15 @@
-from flask import jsonify, request
+from flask import jsonify
+from werkzeug.datastructures import MultiDict
 
+from app.routes.schemas import *
 from app.services import auth_service
-from app.utils import AppError, ValidationError
+from app.utils import ValidationError
 
 
 class AuthController:
-    def login(self) -> tuple:
+    def login(self, form: AuthFormSchema) -> tuple:
         try:
-            data = request.get_json()
-
+            data = MultiDict(form)
             tokens = auth_service.auth_user(data)
 
             return jsonify({
@@ -19,9 +20,9 @@ class AuthController:
         except ValidationError as e:
             return jsonify({
                 'status': 'failure',
-                'message': 'Something went wrong',
+                'message': 'Invalid data provided',
                 'data': str(e)
-            }), 400
+            }), e.code
         except Exception as e:
             return jsonify({
                 'status': 'failure',
