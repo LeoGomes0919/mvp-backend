@@ -13,6 +13,7 @@ class FinanceService:
         self.finance_repository = finance_repository
         self.category_repository = category_repository
         self.user_repository = user_repository
+        self
 
     def create(self, data: dict) -> Finance:
         self.logger.info('[FinanceService]: Creating finance: {data}')
@@ -23,13 +24,14 @@ class FinanceService:
         if not user_id:
             raise ValidationError('Error on create finance unauthorized', 401)
 
-        category = self.category_repository.get_by_id(data.get('category_id'))
+        category = self.category_repository.find_or_create(data.get('category'))
 
         if not category:
             raise ValidationError('Error on create finance category not found')
 
         now = datetime.now()
-        data.update({'date': now, 'user_id': user_id})
+        data.update({'date': now, 'user_id': user_id, 'category_id': category.id})
+        del data['category']
 
         self.finance_repository.create(data)
 
@@ -40,12 +42,13 @@ class FinanceService:
         if not finance:
             raise ValidationError('Error on update finance')
 
-        category = self.category_repository.get_by_id(data.get('category_id'))
+        category = self.category_repository.find_or_create(data.get('category'))
 
         if not category:
-            raise ValidationError('Error on update finance')
+            raise ValidationError('Error on update finance category not found')
 
-        data.update({'date': finance.date, 'id': id})
+        data.update({'date': finance.date, 'id': id, 'category_id': category.id})
+        del data['category']
 
         self.finance_repository.update(data)
 

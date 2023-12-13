@@ -28,7 +28,7 @@ class FinanceFormSchema(BaseModel):
     description: str = 'Description 1'
     value: float = 100.00
     finance_type: FinanceType = 'income'
-    category_id: str = '5f9b0b5b9c9b7b3f1c9b3b3f'
+    category: str = 'Category 1'
 
 
 class FinanceQuerySchema(BaseModel):
