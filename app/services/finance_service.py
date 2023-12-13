@@ -70,14 +70,21 @@ class FinanceService:
             else:
                 filters['finance_type'] = 'outcome'
 
+        sub = get_jwt_identity()
+        user_id = sub.get('user_id')
+
+        filters.update({'user_id': user_id})
+
         finances = self.finance_repository.get_by_filters(filters, pagination)
         finances_schema = FinanceSchema(many=True)
 
         items = finances.get('items')
         del finances['items']
-
+        balance = finances.get('balance')
+        del finances['balance']
         return {
             'items': finances_schema.dump(items),
+            'balance': balance,
             'pagination': finances
         }
 
